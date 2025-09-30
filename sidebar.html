@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Sidebar</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        padding: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>Hello from Sidebar!</h2>
-    <button id="closeBtn">Close Sidebar</button>
-    <script src="sidebar.js"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SRT Grabber Sidebar</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div id="sidebar">
+    <div class="header">
+      <h2>🎬 SRT Grabber</h2>
+    </div>
+
+    <!-- Download button -->
+    <button id="grabSRT">⬇️ Download Latest SRT</button>
+
+    <!-- Status display -->
+    <pre id="status">Waiting...</pre>
+  </div>
+
+  <!-- Include sidebar JS -->
+  <script src="sidebar.js"></script>
+</body>
 </html>

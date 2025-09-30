@@ -1,20 +1,13 @@
 function extractCourse(url) {
-  // Get the last part after the final '/'
   const lastSegment = url.split("/").slice(-2, -1)[0]; 
-  // "math20c_d00"
-
-  // Take everything before the first "_"
   return lastSegment.split("_")[0];
 }
-
-chrome.action.onClicked.addListener(async (tab) => {
-  await chrome.sidePanel.open({ tabId: tab.id });
-});
 
 let latestSRT = null;
 let latestheader = "h";
 console.log("back init");
 
+// Watch for .srt files
 chrome.webRequest.onCompleted.addListener(
   (details) => {
     if (details.url.includes(".srt")) {
@@ -25,6 +18,13 @@ chrome.webRequest.onCompleted.addListener(
   { urls: ["<all_urls>"] }
 );
 
+// Auto-open side panel on matching URL
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete" && tab.url && tab.url.includes("podcast.ucsd.edu")) {
+    chrome.sidePanel.open({ tabId: tabId });
+  }
+});
+
 // Receive lecture header from content.js
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "lectureHeader") {
@@ -34,13 +34,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Allow popup.js (or sidebar) to request the latest SRT + filename
+// Handle SRT requests & downloads
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "getLatestSRT") {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
       const tabId = tabs[0].id;
-
-      // Ask the content script to scrape the header
       chrome.tabs.sendMessage(tabId, { type: "scrapeLectureHeader" }, (response) => {
         if (chrome.runtime.lastError) {
           console.warn("Error talking to content script:", chrome.runtime.lastError.message);
@@ -48,30 +46,33 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           return;
         }
 
-        // Response from content script
         let headerText = response && response.text ? response.text.replace(/\//g, '_') : "Unknown";
-        console.log("ht: " + headerText);
+        let latestFilename = "Transcripts/" + extractCourse(tabs[0].url) + "/" + headerText + ".srt"; // use .srt
         
-        // Build filename using scraped header + course code from URL
-        let latestFilename = "Transcripts/" + extractCourse(tabs[0].url) + "/" + headerText + ".txt";
-        console.log("lfn: " + latestFilename);
-
-        sendResponse({
-          url: latestSRT,          // assuming you already have latestSRT set elsewhere
-          filename: latestFilename
-        });
+        sendResponse({ url: latestSRT, filename: latestFilename });
       });
     });
-
-    return true; // keep the channel open for async response
+    return true; // async response
   }
 
-  // ✅ NEW: handle download requests from sidebar
-  if (msg.type === "downloadSRT" && latestSRT) {
-    console.log("Downloading SRT:", latestSRT);
+  if (msg.type === "downloadSRT") {
+    if (!latestSRT) {
+      console.warn("No SRT detected yet. Cannot download.");
+      return;
+    }
+
+    const filename = msg.filename ? msg.filename : "captions.srt";
+    console.log("Downloading SRT:", latestSRT, "as", filename);
+
     chrome.downloads.download({
       url: latestSRT,
-      filename: msg.filename || "captions.srt"
+      filename: filename
+    }, (downloadId) => {
+      if (chrome.runtime.lastError) {
+        console.error("Download failed:", chrome.runtime.lastError.message);
+      } else {
+        console.log("Download started, ID:", downloadId);
+      }
     });
   }
 });
