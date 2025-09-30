@@ -7,8 +7,11 @@ function extractCourse(url) {
   return lastSegment.split("_")[0];
 }
 
+chrome.action.onClicked.addListener(async (tab) => {
+  await chrome.sidePanel.open({ tabId: tab.id });
+});
+
 let latestSRT = null;
-let tlatestFilename = "captions.srt";
 let latestheader = "h";
 console.log("back init");
 
@@ -22,14 +25,16 @@ chrome.webRequest.onCompleted.addListener(
   { urls: ["<all_urls>"] }
 );
 
+// Receive lecture header from content.js
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "lectureHeader") {
     latestheader = msg.text;
     console.log("found lecture header: " + latestheader);
     sendResponse({});
-  }})
+  }
+});
 
-// Allow popup.js to request the latest SRT
+// Allow popup.js (or sidebar) to request the latest SRT + filename
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "getLatestSRT") {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
@@ -50,6 +55,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         // Build filename using scraped header + course code from URL
         let latestFilename = "Transcripts/" + extractCourse(tabs[0].url) + "/" + headerText + ".txt";
         console.log("lfn: " + latestFilename);
+
         sendResponse({
           url: latestSRT,          // assuming you already have latestSRT set elsewhere
           filename: latestFilename
@@ -59,5 +65,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     return true; // keep the channel open for async response
   }
-});
 
+  // ✅ NEW: handle download requests from sidebar
+  if (msg.type === "downloadSRT" && latestSRT) {
+    console.log("Downloading SRT:", latestSRT);
+    chrome.downloads.download({
+      url: latestSRT,
+      filename: msg.filename || "captions.srt"
+    });
+  }
+});
