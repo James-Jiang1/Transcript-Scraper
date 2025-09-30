@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "SRT Grabber",
+  "version": "1.0",
+  "description": "Grab and download SRT caption files from any website.",
+  "permissions": [
+    "webRequest",
+    "storage",
+    "downloads",
+    "tabs",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Grab Captions"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"], 
+      "js": ["content.js"]
+    }
+  ]
+}
