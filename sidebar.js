@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const grabBtn = document.getElementById("grabSRT");
   const copyBtn = document.getElementById("copyPrompt");
+  const refreshBtn = document.getElementById("refreshPage");
   const status = document.getElementById("status");
 
   console.log("sidebar.js loaded");
@@ -8,16 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Download button
   grabBtn.addEventListener("click", () => {
     console.log("Download button clicked!");
-
     chrome.runtime.sendMessage({ type: "getLatestSRT" }, (response) => {
       if (chrome.runtime.lastError) {
         status.innerText = "Error: " + chrome.runtime.lastError.message;
         return;
       }
-
       if (response && response.url) {
         status.innerText = "SRT found: " + response.url;
-
         chrome.runtime.sendMessage({
           type: "downloadSRT",
           filename: response.filename
@@ -39,6 +37,20 @@ document.addEventListener("DOMContentLoaded", () => {
       status.innerText = "Failed to copy prompt.";
       console.error("Clipboard copy failed:", err);
     }
+  });
+
+  // Refresh page button
+  refreshBtn.addEventListener("click", () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          func: () => location.reload()
+        });
+        status.innerText = "Page refreshed!";
+        console.log("Page refreshed for tab:", tabs[0].id);
+      }
+    });
   });
 
   // Optional: show ready status on load
