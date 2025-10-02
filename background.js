@@ -7,6 +7,12 @@ let latestSRT = null;
 let latestheader = "h";
 console.log("back init");
 
+chrome.action.onClicked.addListener(async (tab) => {
+  if (tab.id) {
+    await chrome.sidePanel.open({ tabId: tab.id });
+  }
+});
+
 // Watch for .srt files
 chrome.webRequest.onCompleted.addListener(
   (details) => {
