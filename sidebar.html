@@ -4,25 +4,25 @@
   <meta charset="UTF-8">
   <title>SRT Grabber Sidebar</title>
   <link rel="stylesheet" href="sidebar.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
   <div id="sidebar">
     <div class="header">
-      <h2>🎬 SRT Grabber</h2>
+      <h2><i data-lucide="file-text"></i> SRT Grabber</h2>
     </div>
 
-    <!-- Download button -->
-    <button id="grabSRT">⬇️ Download Latest SRT</button>
+    <button id="grabSRT"><i data-lucide="download"></i> Download Latest SRT</button>
+    <button id="copyPrompt"><i data-lucide="clipboard"></i> Copy Prompt</button>
+    <button id="refreshPage"><i data-lucide="refresh-cw"></i> Refresh Page</button>
 
-    <!-- Copy prompt button -->
-    <button id="copyPrompt">📋 Copy Prompt</button>
-
-    <button id="refreshPage">🔄 Refresh Page</button>
-
-    <!-- Status display -->
     <pre id="status">Waiting...</pre>
   </div>
 
   <script src="sidebar.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
+
 </html>

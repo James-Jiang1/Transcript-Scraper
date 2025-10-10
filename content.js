@@ -14,14 +14,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
-// Only inject once
-
-
-  // // Close button 
-  // document.getElementById("closeSidebar").addEventListener("click", () => {
-  //   sidebar.remove();
-  // });
-
 // SRT grab button
 document.getElementById("grabSRT").addEventListener("click", () => {
   // Step 1: Ask background for the latest SRT + filename
@@ -40,12 +32,3 @@ document.getElementById("grabSRT").addEventListener("click", () => {
     }
   });
 });
-
-
-
-// chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-//     if (msg.type === "refresh") {
-//         document.location.reload(true);
-//         sendResponse({});
-//     }
-// });
