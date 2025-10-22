@@ -1,7 +1,9 @@
 function extractCourse(url) {
-  const lastSegment = url.split("/").slice(-2, -1)[0]; 
-  return lastSegment.split("_")[0];
+  const parts = url.split("/");
+  const courseSegment = parts.find(p => p.includes("_")); // find the part with underscore
+  return courseSegment ? courseSegment.split("_")[0] : null;
 }
+
 
 let latestSRT = null;
 let latestheader = "h";

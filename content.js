@@ -4,8 +4,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === "scrapeLectureHeader") {
     console.log("scraping header");
     let header = document.querySelector("#LectureHeader h2");
+    // let filedirectory = document.querySelector("#title_Label h1")
     if (header) {
         console.log("sent: " + header.textContent);
+      // sendResponse({ text: filedirectry + "/" + header.textContent });
       sendResponse({ text: header.textContent });
     } else {
       sendResponse({ text: null });
